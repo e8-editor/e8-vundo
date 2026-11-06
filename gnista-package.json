@@ -1,0 +1,6 @@
+{
+  "name": "vundo",
+  "description": "The undo history as a tree, moving the buffer to each state, after vundo.el",
+  "gnista": "0.2.0",
+  "requires": {}
+}

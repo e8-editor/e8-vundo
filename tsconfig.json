@@ -1,0 +1,18 @@
+{
+  // Checks the package as Gnista runs it, against the declarations
+  // `gnista --print-types .gnista` writes (`make types`): gnista.d.ts, and
+  // the packages that ship with Gnista, which this one imports by name.
+  "compilerOptions": {
+    "strict": true,
+    "noEmit": true,
+    "target": "es2023",
+    "lib": ["es2023"],
+    "types": [],
+    "moduleDetection": "force",
+    "module": "preserve",
+    "paths": { "*": ["./*", "./.gnista/shipped/*"] },
+    // Gnista erases types rather than compiling them, so enums and the like are not allowed.
+    "erasableSyntaxOnly": true
+  },
+  "include": ["*.ts", "test/*.ts", ".gnista/gnista.d.ts"]
+}

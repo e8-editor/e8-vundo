@@ -1,0 +1,50 @@
+# Runs the package's ERT tests and type-checks it, on a released Gnista:
+# the oldest the manifest says it runs on, and the newest.
+name: Test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Gnista ${{ matrix.gnista }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gnista: [oldest, newest]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Gnista
+        env:
+          # Gnista-Editor/gnista's releases need a token that can read it
+          # while it is private: a secret GNISTA_RELEASES_TOKEN, else this
+          # repository's own token, which is enough once it is public.
+          GH_TOKEN: ${{ secrets.GNISTA_RELEASES_TOKEN || github.token }}
+        run: |
+          if [ "${{ matrix.gnista }}" = oldest ]; then
+            tag="v$(jq -r '.gnista // empty' gnista-package.json)"
+          fi
+          if [ "${tag:-v}" = v ]; then
+            tag=$(gh release view --repo Gnista-Editor/gnista --json tagName -q .tagName)
+          fi
+          echo "Gnista $tag"
+          cd "$RUNNER_TEMP"
+          gh release download "$tag" --repo Gnista-Editor/gnista --pattern '*-x86_64-unknown-linux-gnu.tar.gz*'
+          sha256sum -c ./*.tar.gz.sha256
+          tar xzf ./*.tar.gz
+          echo "$RUNNER_TEMP/$(basename ./*.tar.gz .tar.gz)" >> "$GITHUB_PATH"
+
+      - name: Test
+        run: make test
+
+      - name: Type-check
+        run: |
+          npm install --global --no-fund --no-audit typescript@5.9
+          make types
