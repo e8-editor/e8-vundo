@@ -10,14 +10,14 @@
 //   m, u  mark and unmark a node  d     diff the marked (or parent) node
 //   RET   keep this state         q     go back to where vundo started
 //
-// Gnista keeps undo history as steps, which vundo reads with
-// gnista.undoHistory, where Emacs's vundo reads buffer-undo-list and
+// E8 keeps undo history as steps, which vundo reads with
+// e8.undoHistory, where Emacs's vundo reads buffer-undo-list and
 // undo-equiv-table: a step that undid another leaves the buffer as it was
 // before that one, the same node of the tree.
 //
 // Copyright (C) 2019-2023 Free Software Foundation, Inc.
-// Copyright (C) 2026 The Gnista contributors
-// Ported to Gnista in 2026.
+// Copyright (C) 2026 The E8 contributors
+// Ported to E8 in 2026.
 //
 // This program is free software: you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the
@@ -44,52 +44,52 @@ const unicode: [string, string][] = [
   ["last-branch", "└"],
 ];
 
-gnista.defineVariable({ name: "vundo-ascii-symbols", doc: "ASCII symbols to draw vundo tree.", value: ascii });
-gnista.defineVariable({ name: "vundo-unicode-symbols", doc: "Unicode symbols to draw vundo tree.", value: unicode });
-gnista.defineVariable({
+e8.defineVariable({ name: "vundo-ascii-symbols", doc: "ASCII symbols to draw vundo tree.", value: ascii });
+e8.defineVariable({ name: "vundo-unicode-symbols", doc: "Unicode symbols to draw vundo tree.", value: unicode });
+e8.defineVariable({
   name: "vundo-glyph-alist",
   doc: 'The characters the tree is drawn with, as [part, character] pairs for node, selected-node, horizontal-stem, vertical-stem, branch and last-branch. Set it to the value of vundo-unicode-symbols to draw with Unicode lines.',
   value: ascii,
 });
-gnista.defineVariable({ name: "vundo-roll-back-on-quit", doc: "If non-nil, vundo will roll back the change when it quits.", value: true });
-gnista.defineVariable({
+e8.defineVariable({ name: "vundo-roll-back-on-quit", doc: "If non-nil, vundo will roll back the change when it quits.", value: true });
+e8.defineVariable({
   name: "vundo-highlight-saved-nodes",
   doc: "If non-nil, vundo will highlight nodes which have been saved and then modified, the most recent in vundo-last-saved.",
   value: true,
 });
-gnista.defineVariable({ name: "vundo-window-max-height", doc: "The maximum height of the vundo window.", value: 3 });
-gnista.defineVariable({ name: "vundo-window-side", doc: 'The vundo window pops up on this side: "bottom" or "top".', value: "bottom" });
-gnista.defineVariable({ name: "vundo-compact-display", doc: "Show a more compact tree display if non-nil: one stem character between nodes, not two.", value: false });
-gnista.defineVariable({
+e8.defineVariable({ name: "vundo-window-max-height", doc: "The maximum height of the vundo window.", value: 3 });
+e8.defineVariable({ name: "vundo-window-side", doc: 'The vundo window pops up on this side: "bottom" or "top".', value: "bottom" });
+e8.defineVariable({ name: "vundo-compact-display", doc: "Show a more compact tree display if non-nil: one stem character between nodes, not two.", value: false });
+e8.defineVariable({
   name: "vundo-diff-quit",
   doc: 'If non-nil, bury the vundo-diff window when vundo is quit; "kill" kills its buffer too.',
   value: true,
 });
-gnista.defineHook("vundo-pre-enter-hook", "Functions called when entering vundo, in the buffer vundo was called in, before vundo sets up.");
-gnista.defineHook("vundo-post-exit-hook", "Functions called when exiting vundo, in the original buffer, after vundo cleans up.");
-gnista.defineHook("vundo-after-undo-functions", "Functions called after vundo motions, with the original buffer.");
-gnista.defineHook("vundo-diff-setup-hook", "Functions called in the vundo-diff buffer after it is set up.");
+e8.defineHook("vundo-pre-enter-hook", "Functions called when entering vundo, in the buffer vundo was called in, before vundo sets up.");
+e8.defineHook("vundo-post-exit-hook", "Functions called when exiting vundo, in the original buffer, after vundo cleans up.");
+e8.defineHook("vundo-after-undo-functions", "Functions called after vundo motions, with the original buffer.");
+e8.defineHook("vundo-diff-setup-hook", "Functions called in the vundo-diff buffer after it is set up.");
 
-gnista.defineFace({ name: "vundo-default", doc: "Default face used in vundo buffer.", attributes: { inherit: "default" } });
-gnista.defineFace({ name: "vundo-node", doc: "Face for nodes in the undo tree.", attributes: { inherit: "vundo-default" } });
-gnista.defineFace({ name: "vundo-stem", doc: "Face for stems between nodes in the undo tree.", attributes: { inherit: "vundo-default" } });
-gnista.defineFace({ name: "vundo-branch-stem", doc: "Face for branching stems in the undo tree.", attributes: { inherit: "vundo-stem", weight: "bold" } });
-gnista.defineFace({
+e8.defineFace({ name: "vundo-default", doc: "Default face used in vundo buffer.", attributes: { inherit: "default" } });
+e8.defineFace({ name: "vundo-node", doc: "Face for nodes in the undo tree.", attributes: { inherit: "vundo-default" } });
+e8.defineFace({ name: "vundo-stem", doc: "Face for stems between nodes in the undo tree.", attributes: { inherit: "vundo-default" } });
+e8.defineFace({ name: "vundo-branch-stem", doc: "Face for branching stems in the undo tree.", attributes: { inherit: "vundo-stem", weight: "bold" } });
+e8.defineFace({
   name: "vundo-highlight",
   doc: "Face for the highlighted node in the undo tree.",
   attributes: { inherit: "vundo-node", weight: "bold" },
   light: { foreground: "red" },
   dark: { foreground: "yellow" },
 });
-gnista.defineFace({
+e8.defineFace({
   name: "vundo-saved",
   doc: "Face for saved nodes in the undo tree.",
   attributes: { inherit: "vundo-node" },
   light: { foreground: "dark green" },
   dark: { foreground: "light green" },
 });
-gnista.defineFace({ name: "vundo-last-saved", doc: "Face for the last saved node in the undo tree.", attributes: { inherit: "vundo-saved", weight: "bold" } });
-gnista.defineFace({
+e8.defineFace({ name: "vundo-last-saved", doc: "Face for the last saved node in the undo tree.", attributes: { inherit: "vundo-saved", weight: "bold" } });
+e8.defineFace({
   name: "vundo-diff-highlight",
   doc: "Face for nodes marked for diff in the undo tree.",
   attributes: { inherit: "vundo-highlight" },
@@ -118,7 +118,7 @@ interface Mod {
 
 /** The mod list of the current buffer's history, as vundo--mod-list-from, with the tree built. */
 function modListFrom(): Mod[] {
-  const history = gnista.undoHistory();
+  const history = e8.undoHistory();
   const mods: Mod[] = [{ idx: 0, children: [] }];
   for (const step of history) mods.push({ idx: mods.length, children: [], timestamp: step.saved });
   buildTree(mods, history);
@@ -222,8 +222,8 @@ function nodeTimestamp(mods: Mod[], node: Mod, noBuffer = false): number | undef
   const ts = state.timestamps.find(([n]) => n === master)?.[1];
   if (ts !== undefined) return ts;
   if (noBuffer || node !== currentNode(mods)) return undefined;
-  return gnista.withCurrentBuffer(state.origBuffer, () =>
-    gnista.variable("buffer-file-name") && !gnista.bufferModified() ? Number.MAX_SAFE_INTEGER : undefined,
+  return e8.withCurrentBuffer(state.origBuffer, () =>
+    e8.variable("buffer-file-name") && !e8.bufferModified() ? Number.MAX_SAFE_INTEGER : undefined,
   );
 }
 
@@ -234,31 +234,31 @@ const BUFFER = " *vundo tree*";
 /** Translates the Unicode tree characters in TEXT to those vundo-glyph-alist gives. */
 function translate(text: string): string {
   const parts: { [ch: string]: string } = { "○": "node", "●": "selected-node", "─": "horizontal-stem", "│": "vertical-stem", "├": "branch", "└": "last-branch" };
-  const alist = gnista.variable("vundo-glyph-alist");
+  const alist = e8.variable("vundo-glyph-alist");
   const glyphs = new Map(Array.isArray(alist) ? (alist as [string, string][]) : ascii);
   return [...text].map((ch) => glyphs.get(parts[ch]) ?? ch).join("");
 }
 
-const eolp = (): boolean => gnista.point() === gnista.pointMax() || gnista.charAfter() === "\n";
+const eolp = (): boolean => e8.point() === e8.pointMax() || e8.charAfter() === "\n";
 
 /** Moves to the next line at column COL, making the line and the column if there are none, as vundo--next-line-at-column. */
 function nextLineAtColumn(col: number): void {
-  if (!(forwardLine(1) === 0 && gnista.point() !== gnista.pointMax())) {
-    gnista.gotoChar(gnista.pointMax());
-    gnista.insert("\n");
+  if (!(forwardLine(1) === 0 && e8.point() !== e8.pointMax())) {
+    e8.gotoChar(e8.pointMax());
+    e8.insert("\n");
   }
-  gnista.moveToColumn(col);
-  if (gnista.currentColumn() !== col) gnista.letBind({ "indent-tabs-mode": false }, () => gnista.indentTo(col));
+  e8.moveToColumn(col);
+  if (e8.currentColumn() !== col) e8.letBind({ "indent-tabs-mode": false }, () => e8.indentTo(col));
 }
 
 /** Draws the tree of MODS in the current buffer, as vundo--draw-tree. */
 function drawTree(mods: Mod[]): void {
-  const compact = gnista.variable("vundo-compact-display") === true;
+  const compact = e8.variable("vundo-compact-display") === true;
   const room = `\\(?: \\{${compact ? 3 : 4},\\}\\|$\\)`;
   const branchChars = `${regexpQuote(translate("├"))}\\|${regexpQuote(translate("└"))}`;
-  const highlightSaved = gnista.variable("vundo-highlight-saved-nodes") !== null && gnista.variable("vundo-highlight-saved-nodes") !== false;
-  gnista.letBind({ "inhibit-read-only": true, "inhibit-modification-hooks": true }, () => {
-    gnista.deleteRegion(gnista.pointMin(), gnista.pointMax());
+  const highlightSaved = e8.variable("vundo-highlight-saved-nodes") !== null && e8.variable("vundo-highlight-saved-nodes") !== false;
+  e8.letBind({ "inhibit-read-only": true, "inhibit-modification-hooks": true }, () => {
+    e8.deleteRegion(e8.pointMin(), e8.pointMax());
     const queue: Mod[] = [mods[0]];
     while (queue.length > 0) {
       const node = queue.shift()!;
@@ -268,32 +268,32 @@ function drawTree(mods: Mod[]): void {
       const lastChild = parent !== undefined && node === siblings[siblings.length - 1];
       const nodeFace = highlightSaved && nodeTimestamp(mods, node, true) !== undefined ? "vundo-saved" : "vundo-node";
       const stemFace = onlyChild ? "vundo-stem" : "vundo-branch-stem";
-      const stem = (text: string) => gnista.insert(gnista.propertize(translate(text), { face: stemFace }));
+      const stem = (text: string) => e8.insert(e8.propertize(translate(text), { face: stemFace }));
       if (parent === undefined) {
-        gnista.insert(gnista.propertize(translate("○"), { face: nodeFace }));
+        e8.insert(e8.propertize(translate("○"), { face: nodeFace }));
       } else {
-        gnista.gotoChar(parent.point!);
-        const planned = gnista.point();
+        e8.gotoChar(parent.point!);
+        const planned = e8.point();
         // A node in the way: try the next line.
-        while (!gnista.lookingAt(room)) {
-          nextLineAtColumn(Math.max(0, gnista.currentColumn() - 1));
-          const replace = gnista.lookingAt(branchChars) ? "├" : "│";
-          if (!eolp()) gnista.deleteRegion(gnista.point(), gnista.point() + 1);
+        while (!e8.lookingAt(room)) {
+          nextLineAtColumn(Math.max(0, e8.currentColumn() - 1));
+          const replace = e8.lookingAt(branchChars) ? "├" : "│";
+          if (!eolp()) e8.deleteRegion(e8.point(), e8.point() + 1);
           stem(replace);
         }
         // Room for the new node.
-        if (!gnista.lookingAt("$")) gnista.deleteRegion(gnista.point(), gnista.point() + (compact ? 2 : 3));
-        if (gnista.point() === planned) {
+        if (!e8.lookingAt("$")) e8.deleteRegion(e8.point(), e8.point() + (compact ? 2 : 3));
+        if (e8.point() === planned) {
           stem(compact ? "─" : "──");
         } else {
           // The line breaks: the stem drawn last becomes a branch.
-          gnista.deleteRegion(gnista.point() - 1, gnista.point());
+          e8.deleteRegion(e8.point() - 1, e8.point());
           stem(lastChild ? (compact ? "└─" : "└──") : compact ? "├─" : "├──");
         }
-        gnista.insert(gnista.propertize(translate("○"), { face: nodeFace }));
+        e8.insert(e8.propertize(translate("○"), { face: nodeFace }));
       }
-      node.point = gnista.point();
-      gnista.putTextProperty(gnista.point() - 1, gnista.point(), "vundo-node", node.idx);
+      node.point = e8.point();
+      e8.putTextProperty(e8.point() - 1, e8.point(), "vundo-node", node.idx);
       queue.unshift(...node.children);
     }
   });
@@ -303,7 +303,7 @@ function drawTree(mods: Mod[]): void {
 
 /** What the vundo buffer shows, as its buffer-local variables in vundo.el. */
 const state = {
-  origBuffer: undefined as unknown as gnista.Buffer,
+  origBuffer: undefined as unknown as e8.Buffer,
   mods: [] as Mod[],
   timestamps: [] as [Mod, number][],
   /** The node quitting goes back to, by index. */
@@ -321,12 +321,12 @@ function currentNode(mods: Mod[]): Mod {
 }
 
 /** Makes or moves an overlay over the node at POINT, as vundo--highlight-node does. */
-function placeOverlay(overlay: number | undefined, point: number, props: { [name: string]: gnista.Value }): number {
+function placeOverlay(overlay: number | undefined, point: number, props: { [name: string]: e8.Value }): number {
   if (overlay === undefined) {
-    overlay = gnista.makeOverlay(point - 1, point);
-    for (const [name, value] of Object.entries(props)) gnista.overlayPut(overlay, name, value);
+    overlay = e8.makeOverlay(point - 1, point);
+    for (const [name, value] of Object.entries(props)) e8.overlayPut(overlay, name, value);
   }
-  gnista.moveOverlay(overlay, point - 1, point);
+  e8.moveOverlay(overlay, point - 1, point);
   return overlay;
 }
 
@@ -345,49 +345,49 @@ function highlightLastSavedNode(mods: Mod[]): void {
  * current node highlighted and point on it, as vundo--refresh-buffer.
  */
 function refresh(): void {
-  const mods = gnista.withCurrentBuffer(state.origBuffer, modListFrom);
+  const mods = e8.withCurrentBuffer(state.origBuffer, modListFrom);
   state.mods = mods;
   state.timestamps = recordTimestamps(mods);
   drawTree(mods);
   const cur = currentNode(mods);
   // The overlays went with the text.
   for (const key of ["highlight", "lastSavedHighlight", "markedHighlight"] as const) {
-    if (state[key] !== undefined) gnista.deleteOverlay(state[key]);
+    if (state[key] !== undefined) e8.deleteOverlay(state[key]);
     state[key] = undefined;
   }
   state.highlight = placeOverlay(state.highlight, cur.point!, { display: translate("●"), face: "vundo-highlight", priority: 2 });
-  gnista.gotoChar(cur.point!);
+  e8.gotoChar(cur.point!);
   if (state.marked !== undefined && mods[state.marked]) diffMark(mods[state.marked]);
-  if (gnista.variable("vundo-highlight-saved-nodes") === true) highlightLastSavedNode(mods);
+  if (e8.variable("vundo-highlight-saved-nodes") === true) highlightLastSavedNode(mods);
 }
 
-const vundo = gnista.defineCommand({
+const vundo = e8.defineCommand({
   name: "vundo",
   doc: "Display visual undo for the current buffer: its undo history as a tree, below it, to move about in.",
   run: () => {
-    const undoList = gnista.variable("buffer-undo-list");
-    if (!Array.isArray(undoList) || undoList.length === 0) gnista.userError("There is no undo history");
-    if (gnista.variable("buffer-read-only") === true) gnista.userError("Buffer is read-only");
-    gnista.runHooks("vundo-pre-enter-hook");
-    vundo1(gnista.currentBuffer());
-    const height = Math.max(3, Math.min(Number(gnista.variable("vundo-window-max-height")) || 3, gnista.withCurrentBuffer(BUFFER, () => gnista.bufferSubstringNoProperties(gnista.pointMin(), gnista.pointMax()).split("\n").length)));
-    let window = gnista.windowList().find((w) => gnista.windowBuffer(w) === BUFFER);
+    const undoList = e8.variable("buffer-undo-list");
+    if (!Array.isArray(undoList) || undoList.length === 0) e8.userError("There is no undo history");
+    if (e8.variable("buffer-read-only") === true) e8.userError("Buffer is read-only");
+    e8.runHooks("vundo-pre-enter-hook");
+    vundo1(e8.currentBuffer());
+    const height = Math.max(3, Math.min(Number(e8.variable("vundo-window-max-height")) || 3, e8.withCurrentBuffer(BUFFER, () => e8.bufferSubstringNoProperties(e8.pointMin(), e8.pointMax()).split("\n").length)));
+    let window = e8.windowList().find((w) => e8.windowBuffer(w) === BUFFER);
     if (window === undefined) {
-      window = gnista.splitRootWindow("below", -height);
-      gnista.setWindowBuffer(window, BUFFER);
+      window = e8.splitRootWindow("below", -height);
+      e8.setWindowBuffer(window, BUFFER);
     }
-    gnista.selectWindow(window);
-    gnista.setWindowDedicatedP(window, true);
+    e8.selectWindow(window);
+    e8.setWindowDedicatedP(window, true);
     state.rollBackTo = currentNode(state.mods).idx;
-    gnista.gotoChar(currentNode(state.mods).point!);
+    e8.gotoChar(currentNode(state.mods).point!);
   },
 });
 
 /** Makes the vundo buffer show BUFFER's history, as vundo-1. */
-function vundo1(buffer: gnista.Buffer): string {
-  gnista.getBufferCreate(BUFFER);
-  gnista.withCurrentBuffer(BUFFER, () => {
-    if (!gnista.derivedModeP("vundo-mode")) gnista.call(vundoMode);
+function vundo1(buffer: e8.Buffer): string {
+  e8.getBufferCreate(BUFFER);
+  e8.withCurrentBuffer(BUFFER, () => {
+    if (!e8.derivedModeP("vundo-mode")) e8.call(vundoMode);
     state.origBuffer = buffer;
     state.marked = undefined;
     refresh();
@@ -397,10 +397,10 @@ function vundo1(buffer: gnista.Buffer): string {
 
 /** Runs BODY in the vundo buffer with the tree up to date, as vundo--check-for-command. */
 function checkForCommand(body: () => void): void {
-  if (!gnista.derivedModeP("vundo-mode")) gnista.userError("Not in vundo buffer");
-  if (!gnista.bufferLiveP(state.origBuffer)) {
-    if (gnista.yOrNP("Original buffer is gone, kill vundo buffer? ")) gnista.call("kill-buffer-and-window");
-    gnista.userError("");
+  if (!e8.derivedModeP("vundo-mode")) e8.userError("Not in vundo buffer");
+  if (!e8.bufferLiveP(state.origBuffer)) {
+    if (e8.yOrNP("Original buffer is gone, kill vundo buffer? ")) e8.call("kill-buffer-and-window");
+    e8.userError("");
   }
   // The original buffer may have changed since: read its history again.
   refresh();
@@ -437,17 +437,17 @@ function latestBufferState(mods: Mod[]): Mod {
  */
 function moveToNode(current: Mod, dest: Mod): void {
   const route = shortestRoute(current, dest);
-  if (!route) gnista.signal("error", "No possible route");
+  if (!route) e8.signal("error", "No possible route");
   const [source, target] = [route[0], route[route.length - 1]];
-  gnista.withCurrentBuffer(state.origBuffer, () => {
-    gnista.makeLocalVariable("buffer-read-only");
-    gnista.setVariable("buffer-read-only", true);
+  e8.withCurrentBuffer(state.origBuffer, () => {
+    e8.makeLocalVariable("buffer-read-only");
+    e8.setVariable("buffer-read-only", true);
     // Mod i is the state after step i - 1, so undoing it is undoing that step.
-    gnista.letBind({ "inhibit-read-only": true }, () => {
-      for (let idx = source; idx > target; idx--) gnista.undoStep(idx - 1);
+    e8.letBind({ "inhibit-read-only": true }, () => {
+      for (let idx = source; idx > target; idx--) e8.undoStep(idx - 1);
     });
-    const win = gnista.windowList().find((w) => gnista.windowBuffer(w) === gnista.bufferName(state.origBuffer));
-    if (win !== undefined) gnista.setWindowPoint(win, gnista.point());
+    const win = e8.windowList().find((w) => e8.windowBuffer(w) === e8.bufferName(state.origBuffer));
+    if (win !== undefined) e8.setWindowPoint(win, e8.point());
   });
 }
 
@@ -459,7 +459,7 @@ function moveToNode(current: Mod, dest: Mod): void {
 function trimUndoList(current: Mod): void {
   const latest = latestBufferState(state.mods).idx;
   const trim = eqvListOf(current).find((node) => node.idx >= latest);
-  if (trim) gnista.withCurrentBuffer(state.origBuffer, () => gnista.truncateUndo(trim.idx));
+  if (trim) e8.withCurrentBuffer(state.origBuffer, () => e8.truncateUndo(trim.idx));
 }
 
 /** Moves to DEST, trims and redraws, as each vundo motion does. */
@@ -490,13 +490,13 @@ function moveAlong(next: (m: Mod) => Mod | undefined, stop: (m: Mod) => boolean)
   });
 }
 
-const vundoQuit = gnista.defineCommand({
+const vundoQuit = e8.defineCommand({
   name: "vundo-quit",
   doc: "Quit buffer and window, rolling back the changes vundo made if vundo-roll-back-on-quit is non-nil.",
   run: () => {
     checkForCommand(() => {
       const cur = currentNode(state.mods);
-      if (gnista.variable("vundo-roll-back-on-quit") === true && state.rollBackTo !== undefined && state.rollBackTo !== cur.idx) {
+      if (e8.variable("vundo-roll-back-on-quit") === true && state.rollBackTo !== undefined && state.rollBackTo !== cur.idx) {
         moveToNode(cur, state.mods[state.rollBackTo]);
       }
       exit();
@@ -504,7 +504,7 @@ const vundoQuit = gnista.defineCommand({
   },
 });
 
-const vundoConfirm = gnista.defineCommand({
+const vundoConfirm = e8.defineCommand({
   name: "vundo-confirm",
   doc: "Confirm change and close vundo window.",
   run: () => exit(),
@@ -513,14 +513,14 @@ const vundoConfirm = gnista.defineCommand({
 /** Leaves vundo, the original buffer writable again and its window selected. */
 function exit(): void {
   const orig = state.origBuffer;
-  gnista.withCurrentBuffer(orig, () => gnista.setVariable("buffer-read-only", false));
-  gnista.call("kill-buffer-and-window");
-  const window = gnista.windowList().find((w) => gnista.windowBuffer(w) === gnista.bufferName(orig));
-  if (window !== undefined) gnista.selectWindow(window);
-  gnista.withCurrentBuffer(orig, () => gnista.runHooks("vundo-post-exit-hook"));
+  e8.withCurrentBuffer(orig, () => e8.setVariable("buffer-read-only", false));
+  e8.call("kill-buffer-and-window");
+  const window = e8.windowList().find((w) => e8.windowBuffer(w) === e8.bufferName(orig));
+  if (window !== undefined) e8.selectWindow(window);
+  e8.withCurrentBuffer(orig, () => e8.runHooks("vundo-post-exit-hook"));
 }
 
-const vundoForward = gnista.defineCommand({
+const vundoForward = e8.defineCommand({
   name: "vundo-forward",
   doc: "Move forward ARG nodes in the undo tree. If ARG < 0, move backward.",
   params: [{ name: "arg", kind: "count" }],
@@ -532,18 +532,18 @@ const vundoForward = gnista.defineCommand({
       for (let n = Math.abs(arg), next = step(dest); next && n > 0; n--, next = step(dest)) dest = next;
       goTo(source, dest);
     });
-    gnista.runHooks("vundo-after-undo-functions", state.origBuffer);
+    e8.runHooks("vundo-after-undo-functions", state.origBuffer);
   },
 });
 
-const vundoBackward = gnista.defineCommand({
+const vundoBackward = e8.defineCommand({
   name: "vundo-backward",
   doc: "Move back ARG nodes in the undo tree. If ARG < 0, move forward.",
   params: [{ name: "arg", kind: "count" }],
-  run: (arg: number) => gnista.call(vundoForward, -arg),
+  run: (arg: number) => e8.call(vundoForward, -arg),
 });
 
-const vundoNext = gnista.defineCommand({
+const vundoNext = e8.defineCommand({
   name: "vundo-next",
   doc: "Move to node below the current one. Move ARG steps.",
   params: [{ name: "arg", kind: "count" }],
@@ -556,15 +556,15 @@ const vundoNext = gnista.defineCommand({
       const idx = siblings.indexOf(source);
       goTo(source, siblings[Math.max(0, Math.min(idx + arg, siblings.length - 1))]);
     });
-    gnista.runHooks("vundo-after-undo-functions", state.origBuffer);
+    e8.runHooks("vundo-after-undo-functions", state.origBuffer);
   },
 });
 
-const vundoPrevious = gnista.defineCommand({
+const vundoPrevious = e8.defineCommand({
   name: "vundo-previous",
   doc: "Move to node above the current one. Move ARG steps.",
   params: [{ name: "arg", kind: "count" }],
-  run: (arg: number) => gnista.call(vundoNext, -arg),
+  run: (arg: number) => e8.call(vundoNext, -arg),
 });
 
 /** Whether NODE starts a stem: its parent has more than one child. */
@@ -572,25 +572,25 @@ const stemRootP = (node: Mod): boolean => (node.parent?.children.length ?? 0) > 
 /** Whether NODE ends a stem: no children, or more than one. */
 const stemEndP = (node: Mod): boolean => node.children.length !== 1;
 
-const vundoStemRoot = gnista.defineCommand({
+const vundoStemRoot = e8.defineCommand({
   name: "vundo-stem-root",
   doc: "Move to the beginning of the current stem.",
   run: () => moveAlong((m) => m.parent, stemRootP),
 });
 
-const vundoNextRoot = gnista.defineCommand({
+const vundoNextRoot = e8.defineCommand({
   name: "vundo-next-root",
   doc: "Move to the beginning of the next stem.",
   run: () => moveAlong((m) => m.children[0], stemRootP),
 });
 
-const vundoStemEnd = gnista.defineCommand({
+const vundoStemEnd = e8.defineCommand({
   name: "vundo-stem-end",
   doc: "Move to the end of the current stem.",
   run: () => moveAlong((m) => m.children[0], stemEndP),
 });
 
-const vundoGotoLastSaved = gnista.defineCommand({
+const vundoGotoLastSaved = e8.defineCommand({
   name: "vundo-goto-last-saved",
   doc: "Go back to the first saved node prior to the current node, if any. With a numeric prefix argument, move that many saved nodes back; a negative one moves forward.",
   params: [{ name: "arg", kind: "count" }],
@@ -599,39 +599,39 @@ const vundoGotoLastSaved = gnista.defineCommand({
     const cur = currentNode(state.mods);
     const dest = findLastSaved(cur, arg);
     if (!dest) {
-      gnista.message("No such saved node");
+      e8.message("No such saved node");
       return;
     }
     if (cur !== dest) checkForCommand(() => goTo(currentNode(state.mods), state.mods[dest.idx]));
-    gnista.message("Node saved");
+    e8.message("Node saved");
   },
 });
 
-const vundoGotoNextSaved = gnista.defineCommand({
+const vundoGotoNextSaved = e8.defineCommand({
   name: "vundo-goto-next-saved",
   doc: "Go to the ARGth saved node after the current node (default 1). A negative ARG goes to the last saved node prior to it.",
   params: [{ name: "arg", kind: "count" }],
-  run: (arg: number) => gnista.call(vundoGotoLastSaved, -arg),
+  run: (arg: number) => e8.call(vundoGotoLastSaved, -arg),
 });
 
-const vundoSave = gnista.defineCommand({
+const vundoSave = e8.defineCommand({
   name: "vundo-save",
   doc: "Save the buffer vundo is operating on.",
   run: () => {
-    checkForCommand(() => gnista.withCurrentBuffer(state.origBuffer, () => gnista.call("save-buffer")));
+    checkForCommand(() => e8.withCurrentBuffer(state.origBuffer, () => e8.call("save-buffer")));
     refresh();
   },
 });
 
-const vundoInspect = gnista.defineCommand({
+const vundoInspect = e8.defineCommand({
   name: "vundo--inspect",
   doc: "Print some useful info about the node at point.",
   run: () => {
-    const idx = gnista.getTextProperty(Math.max(0, gnista.point() - 1), "vundo-node");
+    const idx = e8.getTextProperty(Math.max(0, e8.point() - 1), "vundo-node");
     const node = typeof idx === "number" ? state.mods[idx] : undefined;
     if (!node) return;
     const children = node.children.length > 0 ? `(${node.children.map((c) => c.idx).join(" ")})` : "nil";
-    gnista.message(`Parent: ${node.parent?.idx ?? "nil"} States: (${eqvListOf(node).map((m) => m.idx).join(" ")}) Children: ${children}`);
+    e8.message(`Parent: ${node.parent?.idx ?? "nil"} States: (${eqvListOf(node).map((m) => m.idx).join(" ")}) Children: ${children}`);
   },
 });
 
@@ -643,47 +643,47 @@ function diffMark(node: Mod): void {
   state.markedHighlight = placeOverlay(state.markedHighlight, node.point!, { display: translate("●"), face: "vundo-diff-highlight", priority: 1 });
 }
 
-const vundoDiffMark = gnista.defineCommand({
+const vundoDiffMark = e8.defineCommand({
   name: "vundo-diff-mark",
   doc: "Mark the current node for vundo diff.",
   run: () => diffMark(currentNode(state.mods)),
 });
 
-const vundoDiffUnmark = gnista.defineCommand({
+const vundoDiffUnmark = e8.defineCommand({
   name: "vundo-diff-unmark",
   doc: "Unmark the node marked for vundo diff.",
   run: () => {
     state.marked = undefined;
-    if (state.markedHighlight !== undefined) gnista.deleteOverlay(state.markedHighlight);
+    if (state.markedHighlight !== undefined) e8.deleteOverlay(state.markedHighlight);
     state.markedHighlight = undefined;
   },
 });
 
 /** Quits the vundo-diff window, killing its buffer if vundo-diff-quit says, as vundo-diff--quit. */
 function diffQuit(): void {
-  const name = `*vundo-diff-${gnista.bufferName()}*`;
-  const window = gnista.windowList().find((w) => gnista.windowBuffer(w) === name);
-  const kill = gnista.variable("vundo-diff-quit") === "kill";
+  const name = `*vundo-diff-${e8.bufferName()}*`;
+  const window = e8.windowList().find((w) => e8.windowBuffer(w) === name);
+  const kill = e8.variable("vundo-diff-quit") === "kill";
   if (window !== undefined) {
-    gnista.selectWindow(window);
-    gnista.call("quit-window", kill);
-  } else if (kill && gnista.bufferLiveP(gnista.getBuffer(name))) {
-    gnista.call("kill-buffer", name);
+    e8.selectWindow(window);
+    e8.call("quit-window", kill);
+  } else if (kill && e8.bufferLiveP(e8.getBuffer(name))) {
+    e8.call("kill-buffer", name);
   }
 }
 
-const vundoDiff = gnista.defineCommand({
+const vundoDiff = e8.defineCommand({
   name: "vundo-diff",
   doc: "Show the differences between the marked node's buffer state, or the current node's parent's, and the current one's.",
   run: () => {
-    gnista.addHook("vundo-post-exit-hook", diffQuit);
+    e8.addHook("vundo-post-exit-hook", diffQuit);
     refresh();
     const orig = state.origBuffer;
-    const origName = gnista.bufferName(orig) ?? "";
+    const origName = e8.bufferName(orig) ?? "";
     const current = currentNode(state.mods);
     const marked = state.marked !== undefined ? state.mods[state.marked] : current.parent;
     if (!marked || marked === current) {
-      gnista.message("vundo diff not available.");
+      e8.message("vundo diff not available.");
       return;
     }
     const swapped = marked.idx > current.idx;
@@ -691,39 +691,39 @@ const vundoDiff = gnista.defineCommand({
     let markedText = "";
     checkForCommand(() => {
       moveToNode(current, marked);
-      markedText = gnista.withCurrentBuffer(orig, () => gnista.bufferSubstringNoProperties(gnista.pointMin(), gnista.pointMax()));
+      markedText = e8.withCurrentBuffer(orig, () => e8.bufferSubstringNoProperties(e8.pointMin(), e8.pointMax()));
       refresh();
       moveToNode(currentNode(state.mods), state.mods[current.idx]);
       trimUndoList(state.mods[current.idx]);
       refresh();
     });
-    const currentText = gnista.withCurrentBuffer(orig, () => gnista.bufferSubstringNoProperties(gnista.pointMin(), gnista.pointMax()));
+    const currentText = e8.withCurrentBuffer(orig, () => e8.bufferSubstringNoProperties(e8.pointMin(), e8.pointMax()));
     const [a, b] = swapped ? [current, marked] : [marked, current];
     const [aText, bText] = swapped ? [currentText, markedText] : [markedText, currentText];
     const label = (m: Mod) => `<${origName}> [mod ${m.idx}] (${m === current ? "Current" : state.marked !== undefined ? "Marked" : "Parent"})`;
-    const aFile = gnista.makeTempFile("vundo-diff", { text: aText });
-    const bFile = gnista.makeTempFile("vundo-diff", { text: bText });
+    const aFile = e8.makeTempFile("vundo-diff", { text: aText });
+    const bFile = e8.makeTempFile("vundo-diff", { text: bText });
     const name = `*vundo-diff-${origName}*`;
     try {
       diffNoSelect(aFile, bFile, [label(a), label(b)], name);
     } finally {
-      gnista.deleteFile(aFile);
-      gnista.deleteFile(bFile);
+      e8.deleteFile(aFile);
+      e8.deleteFile(bFile);
     }
-    gnista.withCurrentBuffer(name, () => {
-      gnista.letBind({ "inhibit-read-only": true }, () => {
-        gnista.gotoChar(gnista.pointMin());
-        gnista.insert(gnista.propertize("vundo-diff: ", { face: "diff-header" }));
-        gnista.insert(gnista.propertize(origName, { face: ["diff-file-header", "diff-header"] }));
-        gnista.insert("\n");
+    e8.withCurrentBuffer(name, () => {
+      e8.letBind({ "inhibit-read-only": true }, () => {
+        e8.gotoChar(e8.pointMin());
+        e8.insert(e8.propertize("vundo-diff: ", { face: "diff-header" }));
+        e8.insert(e8.propertize(origName, { face: ["diff-file-header", "diff-header"] }));
+        e8.insert("\n");
       });
-      gnista.runHooks("vundo-diff-setup-hook");
+      e8.runHooks("vundo-diff-setup-hook");
     });
-    gnista.call("display-buffer", name);
+    e8.call("display-buffer", name);
   },
 });
 
-const vundoMode = gnista.defineMajorMode({
+const vundoMode = e8.defineMajorMode({
   name: "vundo-mode",
   modeName: "Vundo",
   parent: "special-mode",
@@ -756,9 +756,9 @@ const vundoMode = gnista.defineMajorMode({
       ["truncate-lines", true],
       ["cursor-type", null],
     ] as const) {
-      gnista.makeLocalVariable(name);
-      gnista.setVariable(name, value);
+      e8.makeLocalVariable(name);
+      e8.setVariable(name, value);
     }
   },
 });
-gnista.remapCommand("vundo-mode-map", "save-buffer", vundoSave);
+e8.remapCommand("vundo-mode-map", "save-buffer", vundoSave);

@@ -1,7 +1,7 @@
 {
-  // Checks the package as Gnista runs it, against the declarations
-  // `gnista --print-types .gnista` writes (`make types`): gnista.d.ts, and
-  // the packages that ship with Gnista, which this one imports by name.
+  // Checks the package as E8 runs it, against the declarations
+  // `e8 --print-types .e8` writes (`make types`): e8.d.ts, and
+  // the packages that ship with E8, which this one imports by name.
   "compilerOptions": {
     "strict": true,
     "noEmit": true,
@@ -10,9 +10,9 @@
     "types": [],
     "moduleDetection": "force",
     "module": "preserve",
-    "paths": { "*": ["./*", "./.gnista/shipped/*"] },
-    // Gnista erases types rather than compiling them, so enums and the like are not allowed.
+    "paths": { "*": ["./*", "./.e8/shipped/*"] },
+    // E8 erases types rather than compiling them, so enums and the like are not allowed.
     "erasableSyntaxOnly": true
   },
-  "include": ["*.ts", "test/*.ts", ".gnista/gnista.d.ts"]
+  "include": ["*.ts", "test/*.ts", ".e8/e8.d.ts"]
 }

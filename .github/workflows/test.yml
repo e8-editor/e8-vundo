@@ -1,4 +1,4 @@
-# Runs the package's ERT tests and type-checks it, on a released Gnista:
+# Runs the package's ERT tests and type-checks it, on a released E8:
 # the oldest the manifest says it runs on, and the newest.
 name: Test
 
@@ -12,28 +12,28 @@ permissions:
 
 jobs:
   test:
-    name: Gnista ${{ matrix.gnista }}
+    name: E8 ${{ matrix.e8 }}
     strategy:
       fail-fast: false
       matrix:
-        gnista: [oldest, newest]
+        e8: [oldest, newest]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
-      - name: Download Gnista
+      - name: Download E8
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "${{ matrix.gnista }}" = oldest ]; then
-            tag="v$(jq -r '.gnista // empty' gnista-package.json)"
+          if [ "${{ matrix.e8 }}" = oldest ]; then
+            tag="v$(jq -r '.e8 // empty' e8-package.json)"
           fi
           if [ "${tag:-v}" = v ]; then
-            tag=$(gh release view --repo Gnista-Editor/gnista --json tagName -q .tagName)
+            tag=$(gh release view --repo e8-editor/e8 --json tagName -q .tagName)
           fi
-          echo "Gnista $tag"
+          echo "E8 $tag"
           cd "$RUNNER_TEMP"
-          gh release download "$tag" --repo Gnista-Editor/gnista --pattern '*-x86_64-unknown-linux-gnu.tar.gz*'
+          gh release download "$tag" --repo e8-editor/e8 --pattern '*-x86_64-unknown-linux-gnu.tar.gz*'
           sha256sum -c ./*.tar.gz.sha256
           tar xzf ./*.tar.gz
           echo "$RUNNER_TEMP/$(basename ./*.tar.gz .tar.gz)" >> "$GITHUB_PATH"

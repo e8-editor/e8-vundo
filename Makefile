@@ -1,14 +1,14 @@
-# make test: run the ERT tests in test/ with gnista --batch, as CI does.
-# make types: type-check the package against the Gnista on PATH.
-# GNISTA=/path/to/gnista make test, to use another Gnista.
+# make test: run the ERT tests in test/ with e8 --batch, as CI does.
+# make types: type-check the package against the E8 on PATH.
+# E8=/path/to/e8 make test, to use another E8.
 
-GNISTA ?= gnista
+E8 ?= e8
 TESTS := $(wildcard test/*-tests.ts)
 .PHONY: test types
 
 test:
-	$(GNISTA) --batch -L . $(foreach t,$(TESTS),-l $(t)) -f ert-run-tests-batch-and-exit
+	$(E8) --batch -L . $(foreach t,$(TESTS),-l $(t)) -f ert-run-tests-batch-and-exit
 
 types:
-	$(GNISTA) --print-types .gnista
+	$(E8) --print-types .e8
 	tsc -p .
