@@ -1,0 +1,38 @@
+vundo NEWS -- history of user-visible changes.
+
+This is the news of e8-vundo, the E8 port of vundo.  'C-h P' shows it
+under the package's description.
+
+
+* Changes in vundo 0.2.0
+
+** vundo needs E8 0.3.0 or newer.
+
+
+* Changes in vundo 0.1.0
+
+This is the first release, a port of vundo 2.4.
+
+** 'M-x vundo' shows the buffer's undo history as a tree below it.
+Moving in the tree takes the buffer back to each state.
+
+** 'f' and 'b' move forward and back along the history.
+
+** 'n' and 'p' move to the node below and above.
+
+** 'a', 'w' and 'e' go to the branch point, next branch and stem's end.
+
+** 'l' and 'r' go to the last and next saved nodes.
+
+** 'm' and 'u' mark and unmark a node, and 'd' diffs it with this one.
+Without a mark, 'd' diffs this node with its parent.
+
+** 'RET' keeps the state, and 'q' goes back to where vundo started.
+
+** 'vundo-glyph-alist' set to 'vundo-unicode-symbols' draws Unicode.
+
+** 'vundo-compact-display' draws one stem character between nodes.
+
+** 'vundo-highlight-saved-nodes' shows which states were saved.
+
+** 'vundo-roll-back-on-quit' says whether 'q' takes the buffer back.
